@@ -1,0 +1,56 @@
+.app {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.home-screen, .profile-create-screen, .drill-screen, .summary-screen, .dashboard-screen {
+  text-align: center;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+input {
+  padding: 8px;
+  font-size: 16px;
+  margin: 10px;
+}
+
+.avatar-selection button {
+  font-size: 2em;
+  margin: 5px;
+  border: 2px solid transparent;
+}
+
+.avatar-selection button.selected {
+  border-color: blue;
+}
+
+.problem {
+  font-size: 2em;
+  margin: 20px;
+}
+
+.problem input {
+  width: 100px;
+  text-align: center;
+}
+
+.feedback {
+  font-size: 1.5em;
+  margin: 20px;
+}
+
+.correct {
+  color: green;
+}
+
+.incorrect {
+  color: red;
+}
