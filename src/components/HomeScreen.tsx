@@ -21,7 +21,7 @@ export default function HomeScreen({ profile, setScreen }: HomeScreenProps) {
     <div className="home-screen">
       <h1>Welcome, {profile.name}!</h1>
       <div className="avatar">
-        <img src={profile.avatar} alt="Avatar" />
+        {profile.avatar}
       </div>
       <button onClick={() => setScreen('drill')}>Start Math Drill</button>
       <button onClick={() => setScreen('dashboard')}>View Progress</button>

@@ -32,6 +32,11 @@ input {
   border-color: blue;
 }
 
+.avatar {
+  font-size: 3em;
+  margin: 20px;
+}
+
 .problem {
   font-size: 2em;
   margin: 20px;
