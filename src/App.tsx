@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { StudentProfile, Session, Screen } from './types';
 import { loadProfile, loadSessions, saveProfile, saveSessions } from './utils';
 import HomeScreen from './components/HomeScreen';
@@ -10,19 +10,9 @@ import './App.css';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('home');
-  const [profile, setProfile] = useState<StudentProfile | null>(null);
-  const [sessions, setSessions] = useState<Session[]>([]);
+  const [profile, setProfile] = useState<StudentProfile | null>(loadProfile);
+  const [sessions, setSessions] = useState<Session[]>(loadSessions);
 
-  useEffect(() => {
-    const loadedProfile = loadProfile();
-    const loadedSessions = loadSessions();
-    setProfile(loadedProfile);
-    setSessions(loadedSessions);
-    // If a profile exists, ensure we're on the home screen
-    if (loadedProfile) {
-      setScreen('home');
-    }
-  }, []);
 
   const updateProfile = (newProfile: StudentProfile) => {
     setProfile(newProfile);
