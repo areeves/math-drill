@@ -1,4 +1,4 @@
-import { StudentProfile, Session, Screen } from '../types';
+import type { StudentProfile, Session, Screen } from '../types';
 import { getOperationSymbol } from '../utils';
 
 interface DashboardScreenProps {

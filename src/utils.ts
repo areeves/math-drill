@@ -1,4 +1,4 @@
-import { Operation, DifficultyLevel, Problem, StudentProfile, Session } from './types';
+import type { Operation, DifficultyLevel, Problem, StudentProfile, Session } from './types';
 
 export function generateProblem(operation: Operation, level: DifficultyLevel): Problem {
   let operand1: number, operand2: number, answer: number;

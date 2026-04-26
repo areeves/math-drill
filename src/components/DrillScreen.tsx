@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StudentProfile, Screen, Problem, Attempt, Session, Operation } from '../types';
+import type { StudentProfile, Screen, Problem, Attempt, Session, Operation } from '../types';
 import { generateProblem, getOperationSymbol } from '../utils';
 
 interface DrillScreenProps {

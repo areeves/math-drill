@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StudentProfile, Screen } from '../types';
+import type { StudentProfile, Screen } from '../types';
 
 interface ProfileCreateScreenProps {
   setProfile: (profile: StudentProfile) => void;

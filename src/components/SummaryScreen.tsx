@@ -1,4 +1,4 @@
-import { Screen } from '../types';
+import type { Screen } from '../types';
 
 interface SummaryScreenProps {
   setScreen: (screen: Screen) => void;

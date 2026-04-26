@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StudentProfile, Screen } from '../types';
+import type { StudentProfile, Screen } from '../types';
 
 interface HomeScreenProps {
   profile: StudentProfile | null;
