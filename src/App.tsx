@@ -18,6 +18,10 @@ function App() {
     const loadedSessions = loadSessions();
     setProfile(loadedProfile);
     setSessions(loadedSessions);
+    // If a profile exists, ensure we're on the home screen
+    if (loadedProfile) {
+      setScreen('home');
+    }
   }, []);
 
   const updateProfile = (newProfile: StudentProfile) => {
