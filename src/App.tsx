@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { StudentProfile, Session, Screen, Operation } from './types';
-import { loadProfile, loadSessions, saveProfile, saveSessions } from './utils';
+import { loadProfile, loadSessions, saveProfile, saveSessions, adjustDifficultyLevels } from './utils';
 import HomeScreen from './components/HomeScreen';
 import ProfileCreateScreen from './components/ProfileCreateScreen';
 import DrillScreen from './components/DrillScreen';
@@ -14,6 +14,7 @@ function App() {
   const [sessions, setSessions] = useState<Session[]>(loadSessions);
   const [selectedOperations, setSelectedOperations] = useState<Operation[]>(['add', 'sub', 'mul', 'div']);
   const [lastSession, setLastSession] = useState<Session | null>(null);
+  const [increasedOps, setIncreasedOps] = useState<Operation[]>([]);
 
   const updateProfile = (newProfile: StudentProfile) => {
     setProfile(newProfile);
@@ -25,6 +26,15 @@ function App() {
     setSessions(newSessions);
     saveSessions(newSessions);
     setLastSession(session);
+
+    // Adjust difficulty levels
+    if (profile) {
+      const { newLevels, increasedOps: incOps } = adjustDifficultyLevels(profile.difficultyLevels, newSessions);
+      const updatedProfile = { ...profile, difficultyLevels: newLevels };
+      setProfile(updatedProfile);
+      saveProfile(updatedProfile);
+      setIncreasedOps(incOps);
+    }
   };
 
   const renderScreen = () => {
@@ -45,12 +55,13 @@ function App() {
           <DrillScreen
             profile={profile}
             selectedOperations={selectedOperations}
+            sessions={sessions}
             addSession={addSession}
             setScreen={setScreen}
           />
         ) : null;
       case 'summary':
-        return <SummaryScreen session={lastSession} setScreen={setScreen} />;
+        return <SummaryScreen session={lastSession} increasedOps={increasedOps} setScreen={setScreen} />;
       case 'dashboard':
         return <DashboardScreen profile={profile} sessions={sessions} setScreen={setScreen} />;
       default:

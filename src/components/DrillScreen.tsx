@@ -1,10 +1,11 @@
 import { useEffect, useReducer, type FormEvent } from 'react';
 import type { StudentProfile, Screen, Problem, Attempt, Session, Operation } from '../types';
-import { generateProblem, getOperationSymbol } from '../utils';
+import { generateWeightedProblems, getOperationSymbol } from '../utils';
 
 interface DrillScreenProps {
   profile: StudentProfile;
   selectedOperations: Operation[];
+  sessions: Session[];
   addSession: (session: Session) => void;
   setScreen: (screen: Screen) => void;
 }
@@ -61,19 +62,14 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
   }
 }
 
-export default function DrillScreen({ profile, selectedOperations, addSession, setScreen }: DrillScreenProps) {
+export default function DrillScreen({ profile, selectedOperations, sessions, addSession, setScreen }: DrillScreenProps) {
   const [state, dispatch] = useReducer(drillReducer, initialState);
   const { problems, currentIndex, userAnswer, attempts, startTime, feedback } = state;
 
   useEffect(() => {
-    const newProblems: Problem[] = Array.from({ length: NUM_PROBLEMS }, (_, index) => {
-      const op = selectedOperations[index % selectedOperations.length];
-      const level = profile.difficultyLevels[op];
-      return generateProblem(op, level);
-    });
-
+    const newProblems = generateWeightedProblems(selectedOperations, profile, sessions, NUM_PROBLEMS);
     dispatch({ type: 'reset', problems: newProblems, startTime: Date.now() });
-  }, [profile, selectedOperations]);
+  }, [profile, selectedOperations, sessions]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

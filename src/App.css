@@ -125,3 +125,52 @@ input {
 .incorrect {
   color: red;
 }
+
+.score-display {
+  margin: 20px 0;
+}
+
+.score {
+  font-size: 3em;
+  font-weight: bold;
+}
+
+.score-detail {
+  font-size: 1.2em;
+  color: #666;
+}
+
+.time-display {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+
+.performance-message {
+  font-size: 1.2em;
+  margin: 20px 0;
+}
+
+.celebration {
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  border: 2px solid #ffa500;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px 0;
+  animation: celebrate 1s ease-in-out;
+}
+
+@keyframes celebrate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.celebration h2 {
+  color: #ff4500;
+  margin: 0;
+}
+
+.celebration p {
+  font-size: 1.2em;
+  margin: 10px 0 0 0;
+}

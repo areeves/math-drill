@@ -1,7 +1,9 @@
-import type { Screen, Session } from '../types';
+import type { Screen, Session, Operation } from '../types';
+import { getOperationSymbol } from '../utils';
 
 interface SummaryScreenProps {
   session: Session | null;
+  increasedOps: Operation[];
   setScreen: (screen: Screen) => void;
 }
 
@@ -13,7 +15,7 @@ function getPerformanceMessage(percentage: number): string {
   return "Keep trying! You'll improve with practice! 🚀";
 }
 
-export default function SummaryScreen({ session, setScreen }: SummaryScreenProps) {
+export default function SummaryScreen({ session, increasedOps, setScreen }: SummaryScreenProps) {
   if (!session) {
     return (
       <div className="summary-screen">
@@ -41,6 +43,12 @@ export default function SummaryScreen({ session, setScreen }: SummaryScreenProps
         Time: {minutes}m {seconds}s
       </div>
       <p className="performance-message">{getPerformanceMessage(percentage)}</p>
+      {increasedOps.length > 0 && (
+        <div className="celebration">
+          <h2>🎉 Level Up! 🎉</h2>
+          <p>You've improved in: {increasedOps.map(op => getOperationSymbol(op)).join(', ')}</p>
+        </div>
+      )}
       <button onClick={() => setScreen('home')}>Back to Home</button>
     </div>
   );
