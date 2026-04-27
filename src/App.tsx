@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { StudentProfile, Session, Screen } from './types';
+import type { StudentProfile, Session, Screen, Operation } from './types';
 import { loadProfile, loadSessions, saveProfile, saveSessions } from './utils';
 import HomeScreen from './components/HomeScreen';
 import ProfileCreateScreen from './components/ProfileCreateScreen';
@@ -12,7 +12,7 @@ function App() {
   const [screen, setScreen] = useState<Screen>('home');
   const [profile, setProfile] = useState<StudentProfile | null>(loadProfile);
   const [sessions, setSessions] = useState<Session[]>(loadSessions);
-
+  const [selectedOperations, setSelectedOperations] = useState<Operation[]>(['add', 'sub', 'mul', 'div']);
 
   const updateProfile = (newProfile: StudentProfile) => {
     setProfile(newProfile);
@@ -28,17 +28,38 @@ function App() {
   const renderScreen = () => {
     switch (screen) {
       case 'home':
-        return <HomeScreen profile={profile} setScreen={setScreen} />;
+        return (
+          <HomeScreen
+            profile={profile}
+            selectedOperations={selectedOperations}
+            setSelectedOperations={setSelectedOperations}
+            setScreen={setScreen}
+          />
+        );
       case 'profile-create':
         return <ProfileCreateScreen setProfile={updateProfile} setScreen={setScreen} />;
       case 'drill':
-        return profile ? <DrillScreen profile={profile} addSession={addSession} setScreen={setScreen} /> : null;
+        return profile ? (
+          <DrillScreen
+            profile={profile}
+            selectedOperations={selectedOperations}
+            addSession={addSession}
+            setScreen={setScreen}
+          />
+        ) : null;
       case 'summary':
         return <SummaryScreen setScreen={setScreen} />;
       case 'dashboard':
         return <DashboardScreen profile={profile} sessions={sessions} setScreen={setScreen} />;
       default:
-        return <HomeScreen profile={profile} setScreen={setScreen} />;
+        return (
+          <HomeScreen
+            profile={profile}
+            selectedOperations={selectedOperations}
+            setSelectedOperations={setSelectedOperations}
+            setScreen={setScreen}
+          />
+        );
     }
   };
 

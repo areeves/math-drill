@@ -1,4 +1,4 @@
-import type { StudentProfile, Session, Screen } from '../types';
+import type { StudentProfile, Session, Screen, Operation, DifficultyLevel } from '../types';
 import { getOperationSymbol } from '../utils';
 
 interface DashboardScreenProps {
@@ -10,10 +10,12 @@ interface DashboardScreenProps {
 export default function DashboardScreen({ profile, sessions, setScreen }: DashboardScreenProps) {
   if (!profile) return <div>No profile found.</div>;
 
-  const getAccuracy = (op: keyof typeof profile.difficultyLevels) => {
-    const relevantAttempts = sessions.flatMap(s => s.attempts.filter(a => a.problem.operation === op));
+  const entries = Object.entries(profile.difficultyLevels) as Array<[Operation, DifficultyLevel]>;
+
+  const getAccuracy = (op: Operation) => {
+    const relevantAttempts = sessions.flatMap((s) => s.attempts.filter((a) => a.problem.operation === op));
     if (relevantAttempts.length === 0) return 0;
-    const correct = relevantAttempts.filter(a => a.correct).length;
+    const correct = relevantAttempts.filter((a) => a.correct).length;
     return Math.round((correct / relevantAttempts.length) * 100);
   };
 
@@ -22,9 +24,9 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
       <h1>Progress Dashboard</h1>
       <h2>Difficulty Levels</h2>
       <ul>
-        {Object.entries(profile.difficultyLevels).map(([op, level]) => (
+        {entries.map(([op, level]) => (
           <li key={op}>
-            {getOperationSymbol(op as any)}: Level {level} (Accuracy: {getAccuracy(op as any)}%)
+            {getOperationSymbol(op)}: Level {level} (Accuracy: {getAccuracy(op)}%)
           </li>
         ))}
       </ul>

@@ -25,6 +25,7 @@ export interface Session {
   timestamp: number;
   attempts: Attempt[];
   timeTaken: number; // in seconds
+  operations: Operation[];
 }
 
 export type Screen = 'home' | 'profile-create' | 'drill' | 'summary' | 'dashboard';
