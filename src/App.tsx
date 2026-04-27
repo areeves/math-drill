@@ -13,6 +13,7 @@ function App() {
   const [profile, setProfile] = useState<StudentProfile | null>(loadProfile);
   const [sessions, setSessions] = useState<Session[]>(loadSessions);
   const [selectedOperations, setSelectedOperations] = useState<Operation[]>(['add', 'sub', 'mul', 'div']);
+  const [lastSession, setLastSession] = useState<Session | null>(null);
 
   const updateProfile = (newProfile: StudentProfile) => {
     setProfile(newProfile);
@@ -23,6 +24,7 @@ function App() {
     const newSessions = [...sessions, session];
     setSessions(newSessions);
     saveSessions(newSessions);
+    setLastSession(session);
   };
 
   const renderScreen = () => {
@@ -48,7 +50,7 @@ function App() {
           />
         ) : null;
       case 'summary':
-        return <SummaryScreen setScreen={setScreen} />;
+        return <SummaryScreen session={lastSession} setScreen={setScreen} />;
       case 'dashboard':
         return <DashboardScreen profile={profile} sessions={sessions} setScreen={setScreen} />;
       default:
