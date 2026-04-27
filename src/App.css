@@ -22,10 +22,76 @@ input {
   margin: 10px;
 }
 
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.avatar-preview {
+  font-size: 4rem;
+  padding: 15px;
+  border: 3px solid #ccc;
+  border-radius: 16px;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+}
+
+.profile-form {
+  display: grid;
+  gap: 20px;
+  text-align: left;
+}
+
+.difficulty-preview {
+  background: #f4f7ff;
+  border: 1px solid #d7e2ff;
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.difficulty-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.difficulty-preview div {
+  padding: 10px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e0e7ff;
+}
+
+.field-label {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.avatar-selection {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .avatar-selection button {
   font-size: 2em;
   margin: 5px;
   border: 2px solid transparent;
+  border-radius: 10px;
+  width: 56px;
+  height: 56px;
+  background: white;
 }
 
 .avatar-selection button.selected {

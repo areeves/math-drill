@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import type { StudentProfile, Screen } from '../types';
+import { useState, type FormEvent } from 'react';
+import type { StudentProfile, Screen, Operation, DifficultyLevel } from '../types';
 
 interface ProfileCreateScreenProps {
   setProfile: (profile: StudentProfile) => void;
@@ -7,18 +7,20 @@ interface ProfileCreateScreenProps {
 }
 
 const avatars = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+const defaultDifficultyLevels: Record<Operation, DifficultyLevel> = { add: 1, sub: 1, mul: 1, div: 1 };
 
 export default function ProfileCreateScreen({ setProfile, setScreen }: ProfileCreateScreenProps) {
   const [name, setName] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState(avatars[0]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (name.trim()) {
+    const trimmedName = name.trim();
+    if (trimmedName) {
       const profile: StudentProfile = {
-        name: name.trim(),
+        name: trimmedName,
         avatar: selectedAvatar,
-        difficultyLevels: { add: 1, sub: 1, mul: 1, div: 1 }
+        difficultyLevels: defaultDifficultyLevels,
       };
       setProfile(profile);
       setScreen('home');
@@ -27,20 +29,30 @@ export default function ProfileCreateScreen({ setProfile, setScreen }: ProfileCr
 
   return (
     <div className="profile-create-screen">
-      <h1>Create Your Profile</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Name:
+      <div className="profile-header">
+        <div className="avatar-preview" aria-hidden="true">{selectedAvatar}</div>
+        <div>
+          <h1>Create Student Profile</h1>
+          <p>
+            Set up your student with a name and avatar. The profile starts all operations at Beginner difficulty so practice begins where it should.
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="profile-form">
+        <label className="field-label">
+          Student Name:
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required
+            placeholder="Enter student name"
           />
         </label>
-        <label>
+
+        <div className="field-label">
           Choose Avatar:
-          <div className="avatar-selection">
+          <div className="avatar-selection" role="group" aria-label="Avatar selection">
             {avatars.map((avatar) => (
               <button
                 key={avatar}
@@ -52,8 +64,21 @@ export default function ProfileCreateScreen({ setProfile, setScreen }: ProfileCr
               </button>
             ))}
           </div>
-        </label>
-        <button type="submit">Create Profile</button>
+        </div>
+
+        <div className="difficulty-preview">
+          <h2>Starting Difficulty</h2>
+          <div className="difficulty-grid">
+            <div>Addition: Beginner</div>
+            <div>Subtraction: Beginner</div>
+            <div>Multiplication: Beginner</div>
+            <div>Division: Beginner</div>
+          </div>
+        </div>
+
+        <button type="submit" disabled={!name.trim()}>
+          {name.trim() ? 'Create Profile' : 'Enter a name'}
+        </button>
       </form>
     </div>
   );
