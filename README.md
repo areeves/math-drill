@@ -1,83 +1,66 @@
 # Math Drills
 
-A web-based arithmetic practice application for early learners. This app presents math problems adaptively based on student performance, tracks progress, and provides a parent dashboard.
-
-## Getting Started
-
-1. Install dependencies: `npm install`
-2. Start the development server: `npm run dev`
-3. Open http://localhost:5174 in your browser
+Math Drills is a web-based arithmetic practice app built for early learners. It delivers adaptive addition, subtraction, multiplication, and division problems, tracks student progress, and includes a simple parent dashboard.
 
 ## Features
 
-- Student profile creation with avatar selection
+- Create a student profile with name and avatar
 - Adaptive math drills for addition, subtraction, multiplication, and division
-- Progress tracking and dashboard
-- Local data storage
+- Session summaries with score and performance feedback
+- Local progress tracking and history
+- Responsive UI for desktop and tablet devices
+- Static deployment ready (e.g. GitHub Pages)
+
+## Tech Stack
+
+- React 19
+- TypeScript
+- Vite
+- ESLint
+- gh-pages for static deployment
+
+## Getting Started
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start local development:
+   ```bash
+   npm run dev
+   ```
+3. Open the app in your browser:
+   ```
+   http://localhost:5174
+   ```
+
+## Available Scripts
+
+- `npm run dev` — start the Vite development server
+- `npm run build` — build the application for production
+- `npm run preview` — preview the production build locally
+- `npm run lint` — run ESLint on the source tree
+- `npm run deploy` — build and deploy the `dist` folder with `gh-pages`
+
+## Deployment
+
+This project can be deployed as a static site. The current `npm run deploy` script uses `gh-pages` to publish the production build from `dist`.
 
 ## Requirements
 
-See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) for detailed functional requirements.
+See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) for full functional requirements and user stories.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Project Structure
 
-## Expanding the ESLint configuration
+- `src/` — application source code
+- `src/components/` — screen and UI components
+- `src/utils.ts` — shared utility helpers
+- `src/types.ts` — TypeScript type definitions
+- `public/` — static assets
+- `docs/` — product and requirements documentation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Notes
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+This repository uses a standard Vite + React + TypeScript setup.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+If you want to extend linting rules for a production-ready app, update `eslint.config.js` to enable type-aware rules and React-specific plugin configurations.
