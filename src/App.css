@@ -103,6 +103,19 @@ input {
   margin: 20px;
 }
 
+.home-screen .avatar {
+  font-size: 4rem;
+  margin: 24px auto;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #ccc;
+  border-radius: 18px;
+  background: #f9f9f9;
+}
+
 .problem {
   font-size: 2em;
   margin: 20px;
