@@ -1,21 +1,12 @@
 import { useEffect } from 'react';
-import type { StudentProfile, Screen, Operation } from '../types';
-
-const OPERATION_LABELS: Record<Operation, string> = {
-  add: 'Addition',
-  sub: 'Subtraction',
-  mul: 'Multiplication',
-  div: 'Division',
-};
+import type { StudentProfile, Screen } from '../types';
 
 interface HomeScreenProps {
   profile: StudentProfile | null;
-  selectedOperations: Operation[];
-  setSelectedOperations: (operations: Operation[]) => void;
   setScreen: (screen: Screen) => void;
 }
 
-export default function HomeScreen({ profile, selectedOperations, setSelectedOperations, setScreen }: HomeScreenProps) {
+export default function HomeScreen({ profile, setScreen }: HomeScreenProps) {
   useEffect(() => {
     if (!profile) {
       setScreen('profile-create');
@@ -26,15 +17,7 @@ export default function HomeScreen({ profile, selectedOperations, setSelectedOpe
     return <div>Loading...</div>;
   }
 
-  const toggleOperation = (operation: Operation) => {
-    if (selectedOperations.includes(operation)) {
-      setSelectedOperations(selectedOperations.filter((op) => op !== operation));
-    } else {
-      setSelectedOperations([...selectedOperations, operation]);
-    }
-  };
-
-  const canStart = selectedOperations.length > 0;
+  const canStart = profile.settings.includedOperations.length > 0;
 
   return (
     <div className="home-screen">
@@ -42,23 +25,8 @@ export default function HomeScreen({ profile, selectedOperations, setSelectedOpe
       <div className="avatar">
         {profile.avatar}
       </div>
-      <div className="operation-selector">
-        <p>Select operations to practice:</p>
-        <div className="operations-list">
-          {(['add', 'sub', 'mul', 'div'] as Operation[]).map((operation) => (
-            <label key={operation} className="operation-option">
-              <input
-                type="checkbox"
-                checked={selectedOperations.includes(operation)}
-                onChange={() => toggleOperation(operation)}
-              />
-              {OPERATION_LABELS[operation]}
-            </label>
-          ))}
-        </div>
-      </div>
       <button disabled={!canStart} onClick={() => setScreen('drill')}>Start Math Drill</button>
-      {!canStart && <div className="warning">Select at least one operation to start the drill.</div>}
+      {!canStart && <div className="warning">No operations selected in settings. Go to settings to choose at least one.</div>}
       <button onClick={() => setScreen('dashboard')}>View Progress</button>
       <button onClick={() => setScreen('settings')}>Settings</button>
     </div>

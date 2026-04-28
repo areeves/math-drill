@@ -1,10 +1,9 @@
 import { useEffect, useReducer, type FormEvent } from 'react';
-import type { StudentProfile, Screen, Problem, Attempt, Session, Operation } from '../types';
+import type { StudentProfile, Screen, Problem, Attempt, Session } from '../types';
 import { generateWeightedProblems, getOperationSymbol } from '../utils';
 
 interface DrillScreenProps {
   profile: StudentProfile;
-  selectedOperations: Operation[];
   numProblems: number;
   sessions: Session[];
   addSession: (session: Session) => void;
@@ -61,14 +60,14 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
   }
 }
 
-export default function DrillScreen({ profile, selectedOperations, numProblems, sessions, addSession, setScreen }: DrillScreenProps) {
+export default function DrillScreen({ profile, numProblems, sessions, addSession, setScreen }: DrillScreenProps) {
   const [state, dispatch] = useReducer(drillReducer, initialState);
   const { problems, currentIndex, userAnswer, attempts, startTime, feedback } = state;
 
   useEffect(() => {
-    const newProblems = generateWeightedProblems(selectedOperations, profile, sessions, numProblems);
+    const newProblems = generateWeightedProblems(profile.settings.includedOperations, profile, sessions, numProblems);
     dispatch({ type: 'reset', problems: newProblems, startTime: Date.now() });
-  }, [profile, selectedOperations, sessions, numProblems]);
+  }, [profile, sessions, numProblems]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -91,7 +90,7 @@ export default function DrillScreen({ profile, selectedOperations, numProblems, 
           timestamp: endTime,
           attempts: newAttempts,
           timeTaken,
-          operations: selectedOperations,
+        operations: profile.settings.includedOperations,
         };
         addSession(session);
         setScreen('summary');
@@ -99,11 +98,11 @@ export default function DrillScreen({ profile, selectedOperations, numProblems, 
     }, 2000);
   };
 
-  if (selectedOperations.length === 0) {
+  if (profile.settings.includedOperations.length === 0) {
     return (
       <div className="drill-screen">
-        <div className="warning">No operations selected. Return to the home screen to choose at least one.</div>
-        <button onClick={() => setScreen('home')}>Back to Home</button>
+        <div className="warning">No operations selected. Go to settings to choose at least one.</div>
+        <button onClick={() => setScreen('settings')}>Go to Settings</button>
       </div>
     );
   }

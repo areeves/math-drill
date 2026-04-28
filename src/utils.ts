@@ -171,16 +171,16 @@ export function adjustDifficultyLevels(
 }
 
 export function generateWeightedProblems(
-  selectedOperations: Operation[],
+  operations: Operation[],
   profile: StudentProfile,
   sessions: Session[],
   numProblems: number
 ): Problem[] {
-  if (selectedOperations.length === 0) return [];
+  if (operations.length === 0) return [];
 
   // Calculate error rates (1 - accuracy) for weighting
   const errorRates: Record<Operation, number> = { add: 0, sub: 0, mul: 0, div: 0 };
-  selectedOperations.forEach(op => {
+  operations.forEach(op => {
     const attempts = getRecentAttempts(sessions, op, 20);
     const accuracy = calculateAccuracy(attempts);
     errorRates[op] = 1 - accuracy;
@@ -191,9 +191,9 @@ export function generateWeightedProblems(
   const weights: Record<Operation, number> = { add: 0, sub: 0, mul: 0, div: 0 };
   if (totalError === 0) {
     // If no errors, equal weights
-    selectedOperations.forEach(op => weights[op] = 1 / selectedOperations.length);
+    operations.forEach(op => weights[op] = 1 / operations.length);
   } else {
-    selectedOperations.forEach(op => weights[op] = errorRates[op] / totalError);
+    operations.forEach(op => weights[op] = errorRates[op] / totalError);
   }
 
   // Generate problems based on weights
@@ -201,8 +201,8 @@ export function generateWeightedProblems(
   for (let i = 0; i < numProblems; i++) {
     const rand = Math.random();
     let cumulative = 0;
-    let selectedOp: Operation = selectedOperations[0];
-    for (const op of selectedOperations) {
+    let selectedOp: Operation = operations[0];
+    for (const op of operations) {
       cumulative += weights[op];
       if (rand <= cumulative) {
         selectedOp = op;

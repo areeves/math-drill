@@ -20,9 +20,6 @@ function App() {
   const [screen, setScreen] = useState<Screen>('home');
   const [profile, setProfile] = useState<StudentProfile | null>(loadedProfile);
   const [sessions, setSessions] = useState<Session[]>(loadSessions);
-  const [selectedOperations, setSelectedOperations] = useState<Operation[]>(
-    loadedProfile?.settings.includedOperations ?? ['add', 'sub', 'mul', 'div']
-  );
   const [numProblems, setNumProblems] = useState<number>(loadedProfile?.settings.problemsPerSession ?? 10);
   const [lastSession, setLastSession] = useState<Session | null>(null);
   const [increasedOps, setIncreasedOps] = useState<Operation[]>([]);
@@ -30,7 +27,6 @@ function App() {
   const updateProfile = (newProfile: StudentProfile) => {
     setProfile(newProfile);
     saveProfile(newProfile);
-    setSelectedOperations(newProfile.settings.includedOperations);
     setNumProblems(newProfile.settings.problemsPerSession);
   };
 
@@ -50,7 +46,6 @@ function App() {
     saveProfile(resetProfile);
     setSessions([]);
     saveSessions([]);
-    setSelectedOperations(resetProfile.settings.includedOperations);
     setNumProblems(resetProfile.settings.problemsPerSession);
   };
 
@@ -76,8 +71,6 @@ function App() {
         return (
           <HomeScreen
             profile={profile}
-            selectedOperations={selectedOperations}
-            setSelectedOperations={setSelectedOperations}
             setScreen={setScreen}
           />
         );
@@ -87,7 +80,6 @@ function App() {
         return profile ? (
           <DrillScreen
             profile={profile}
-            selectedOperations={selectedOperations}
             numProblems={numProblems}
             sessions={sessions}
             addSession={addSession}
@@ -112,8 +104,6 @@ function App() {
         return (
           <HomeScreen
             profile={profile}
-            selectedOperations={selectedOperations}
-            setSelectedOperations={setSelectedOperations}
             setScreen={setScreen}
           />
         );
