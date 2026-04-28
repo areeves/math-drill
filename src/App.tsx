@@ -1,24 +1,57 @@
 import { useState } from 'react';
 import type { StudentProfile, Session, Screen, Operation } from './types';
-import { loadProfile, loadSessions, saveProfile, saveSessions, adjustDifficultyLevels } from './utils';
+import {
+  loadProfile,
+  loadSessions,
+  saveProfile,
+  saveSessions,
+  adjustDifficultyLevels,
+} from './utils';
 import HomeScreen from './components/HomeScreen';
 import ProfileCreateScreen from './components/ProfileCreateScreen';
 import DrillScreen from './components/DrillScreen';
 import SummaryScreen from './components/SummaryScreen';
 import DashboardScreen from './components/DashboardScreen';
+import SettingsScreen from './components/SettingsScreen';
 import './App.css';
 
 function App() {
+  const loadedProfile = loadProfile();
   const [screen, setScreen] = useState<Screen>('home');
-  const [profile, setProfile] = useState<StudentProfile | null>(loadProfile);
+  const [profile, setProfile] = useState<StudentProfile | null>(loadedProfile);
   const [sessions, setSessions] = useState<Session[]>(loadSessions);
-  const [selectedOperations, setSelectedOperations] = useState<Operation[]>(['add', 'sub', 'mul', 'div']);
+  const [selectedOperations, setSelectedOperations] = useState<Operation[]>(
+    loadedProfile?.settings.includedOperations ?? ['add', 'sub', 'mul', 'div']
+  );
+  const [numProblems, setNumProblems] = useState<number>(loadedProfile?.settings.problemsPerSession ?? 10);
   const [lastSession, setLastSession] = useState<Session | null>(null);
   const [increasedOps, setIncreasedOps] = useState<Operation[]>([]);
 
   const updateProfile = (newProfile: StudentProfile) => {
     setProfile(newProfile);
     saveProfile(newProfile);
+    setSelectedOperations(newProfile.settings.includedOperations);
+    setNumProblems(newProfile.settings.problemsPerSession);
+  };
+
+  const clearProfileData = () => {
+    if (!profile) return;
+
+    const resetProfile: StudentProfile = {
+      ...profile,
+      difficultyLevels: { add: 1, sub: 1, mul: 1, div: 1 },
+      settings: {
+        problemsPerSession: 10,
+        includedOperations: ['add', 'sub', 'mul', 'div'],
+      },
+    };
+
+    setProfile(resetProfile);
+    saveProfile(resetProfile);
+    setSessions([]);
+    saveSessions([]);
+    setSelectedOperations(resetProfile.settings.includedOperations);
+    setNumProblems(resetProfile.settings.problemsPerSession);
   };
 
   const addSession = (session: Session) => {
@@ -55,6 +88,7 @@ function App() {
           <DrillScreen
             profile={profile}
             selectedOperations={selectedOperations}
+            numProblems={numProblems}
             sessions={sessions}
             addSession={addSession}
             setScreen={setScreen}
@@ -64,6 +98,16 @@ function App() {
         return <SummaryScreen session={lastSession} increasedOps={increasedOps} setScreen={setScreen} />;
       case 'dashboard':
         return <DashboardScreen profile={profile} sessions={sessions} setScreen={setScreen} />;
+      case 'settings':
+        return (
+          <SettingsScreen
+            profile={profile}
+            sessions={sessions}
+            updateProfile={updateProfile}
+            clearProfileData={clearProfileData}
+            setScreen={setScreen}
+          />
+        );
       default:
         return (
           <HomeScreen

@@ -8,6 +8,10 @@ interface ProfileCreateScreenProps {
 
 const avatars = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
 const defaultDifficultyLevels: Record<Operation, DifficultyLevel> = { add: 1, sub: 1, mul: 1, div: 1 };
+const defaultSettings = {
+  problemsPerSession: 10 as const,
+  includedOperations: ['add', 'sub', 'mul', 'div'] as Operation[],
+};
 
 export default function ProfileCreateScreen({ setProfile, setScreen }: ProfileCreateScreenProps) {
   const [name, setName] = useState('');
@@ -21,6 +25,7 @@ export default function ProfileCreateScreen({ setProfile, setScreen }: ProfileCr
         name: trimmedName,
         avatar: selectedAvatar,
         difficultyLevels: defaultDifficultyLevels,
+        settings: defaultSettings,
       };
       setProfile(profile);
       setScreen('home');

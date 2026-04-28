@@ -1,4 +1,9 @@
-import type { Operation, DifficultyLevel, Problem, StudentProfile, Session, Attempt } from './types';
+import type { Operation, DifficultyLevel, Problem, StudentProfile, Session, Attempt, ProfileSettings } from './types';
+
+const DEFAULT_SETTINGS: ProfileSettings = {
+  problemsPerSession: 10,
+  includedOperations: ['add', 'sub', 'mul', 'div'],
+};
 
 export function generateProblem(operation: Operation, level: DifficultyLevel): Problem {
   let operand1: number, operand2: number, answer: number;
@@ -62,7 +67,15 @@ export function saveProfile(profile: StudentProfile): void {
 
 export function loadProfile(): StudentProfile | null {
   const data = localStorage.getItem(PROFILE_KEY);
-  return data ? JSON.parse(data) : null;
+  if (!data) return null;
+  const parsed = JSON.parse(data) as StudentProfile;
+  return {
+    ...parsed,
+    settings: {
+      ...DEFAULT_SETTINGS,
+      ...(parsed.settings ?? {}),
+    },
+  };
 }
 
 export function saveSessions(sessions: Session[]): void {
@@ -72,6 +85,45 @@ export function saveSessions(sessions: Session[]): void {
 export function loadSessions(): Session[] {
   const data = localStorage.getItem(SESSIONS_KEY);
   return data ? JSON.parse(data) : [];
+}
+
+export function generateSessionHistoryCsv(sessions: Session[]): string {
+  const headers = [
+    'sessionTimestamp',
+    'timeTakenSeconds',
+    'operation',
+    'operand1',
+    'operand2',
+    'correctAnswer',
+    'userAnswer',
+    'correct',
+  ];
+
+  const rows = sessions.flatMap((session) =>
+    session.attempts.map((attempt) => [
+      new Date(session.timestamp).toISOString(),
+      session.timeTaken.toString(),
+      attempt.problem.operation,
+      attempt.problem.operand1.toString(),
+      attempt.problem.operand2.toString(),
+      attempt.problem.answer.toString(),
+      attempt.userAnswer.toString(),
+      attempt.correct ? 'true' : 'false',
+    ])
+  );
+
+  const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
+  return [headers, ...rows].map((row) => row.map(escape).join(',')).join('\n');
+}
+
+export function downloadCsv(csv: string, filename: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export function getRecentAttempts(sessions: Session[], operation: Operation, n: number = 20): Attempt[] {

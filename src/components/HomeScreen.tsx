@@ -60,6 +60,7 @@ export default function HomeScreen({ profile, selectedOperations, setSelectedOpe
       <button disabled={!canStart} onClick={() => setScreen('drill')}>Start Math Drill</button>
       {!canStart && <div className="warning">Select at least one operation to start the drill.</div>}
       <button onClick={() => setScreen('dashboard')}>View Progress</button>
+      <button onClick={() => setScreen('settings')}>Settings</button>
     </div>
   );
 }

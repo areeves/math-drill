@@ -1,0 +1,147 @@
+import type { StudentProfile, Screen, Session, Operation, DifficultyLevel } from '../types';
+import { getOperationSymbol, generateSessionHistoryCsv, downloadCsv } from '../utils';
+
+interface SettingsScreenProps {
+  profile: StudentProfile | null;
+  sessions: Session[];
+  updateProfile: (profile: StudentProfile) => void;
+  clearProfileData: () => void;
+  setScreen: (screen: Screen) => void;
+}
+
+const operations: Operation[] = ['add', 'sub', 'mul', 'div'];
+const difficultyLabels: Record<DifficultyLevel, string> = {
+  1: 'Beginner',
+  2: 'Developing',
+  3: 'Proficient',
+  4: 'Advanced',
+};
+
+export default function SettingsScreen({ profile, sessions, updateProfile, clearProfileData, setScreen }: SettingsScreenProps) {
+  if (!profile) {
+    return <div>No profile found.</div>;
+  }
+
+  const handleProblemsPerSession = (value: 5 | 10 | 20) => {
+    const updated = {
+      ...profile,
+      settings: {
+        ...profile.settings,
+        problemsPerSession: value,
+      },
+    };
+    updateProfile(updated);
+  };
+
+  const handleToggleOperation = (operation: Operation) => {
+    const current = profile.settings.includedOperations;
+    const isSelected = current.includes(operation);
+    if (isSelected && current.length === 1) return;
+
+    const updatedOperations = isSelected 
+      ? current.filter((op) => op !== operation)
+      : [...current, operation];
+
+    const updated = {
+      ...profile,
+      settings: {
+        ...profile.settings,
+        includedOperations: updatedOperations,
+      },
+    };
+    updateProfile(updated);
+  };
+
+  const handleDifficultyChange = (operation: Operation, level: DifficultyLevel) => {
+    const updated = {
+      ...profile,
+      difficultyLevels: {
+        ...profile.difficultyLevels,
+        [operation]: level,
+      },
+    };
+    updateProfile(updated);
+  };
+
+  const handleExport = () => {
+    const csv = generateSessionHistoryCsv(sessions);
+    downloadCsv(csv, 'math-drill-session-history.csv');
+  };
+
+  const canExport = sessions.length > 0;
+  const { settings } = profile;
+
+  return (
+    <div className="settings-screen">
+      <h1>Settings</h1>
+      <div className="settings-section">
+        <h2>Session Size</h2>
+        <div className="radio-group">
+          {[5, 10, 20].map((count) => (
+            <label key={count}>
+              <input
+                type="radio"
+                name="problemsPerSession"
+                checked={settings.problemsPerSession === count}
+                onChange={() => handleProblemsPerSession(count as 5 | 10 | 20)}
+              />
+              {count} problems per session
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h2>Included Operations</h2>
+        <div className="operation-toggle-group">
+          {operations.map((operation) => (
+            <label key={operation}>
+              <input
+                type="checkbox"
+                checked={settings.includedOperations.includes(operation)}
+                onChange={() => handleToggleOperation(operation)}
+              />
+              {getOperationSymbol(operation)} {operation}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h2>Manual Difficulty Overrides</h2>
+        <div className="difficulty-grid">
+          {operations.map((operation) => (
+            <label key={operation} className="difficulty-row">
+              <span>{getOperationSymbol(operation)}</span>
+              <select
+                value={profile.difficultyLevels[operation]}
+                onChange={(event) => handleDifficultyChange(operation, Number(event.target.value) as DifficultyLevel)}
+              >
+                {[1, 2, 3, 4].map((level) => (
+                  <option key={level} value={level}>
+                    Level {level} — {difficultyLabels[level as DifficultyLevel]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <h2>Data Management</h2>
+        <button onClick={handleExport} disabled={!canExport}>
+          Export Session History as CSV
+        </button>
+        {!canExport && <p className="info">Complete at least one session before exporting history.</p>}
+        <button className="danger" onClick={clearProfileData}>
+          Clear all stored profile data
+        </button>
+      </div>
+
+      <div className="settings-actions">
+        <button onClick={() => setScreen('home')}>Back to Home</button>
+      </div>
+    </div>
+  );
+}

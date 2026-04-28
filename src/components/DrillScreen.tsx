@@ -5,12 +5,11 @@ import { generateWeightedProblems, getOperationSymbol } from '../utils';
 interface DrillScreenProps {
   profile: StudentProfile;
   selectedOperations: Operation[];
+  numProblems: number;
   sessions: Session[];
   addSession: (session: Session) => void;
   setScreen: (screen: Screen) => void;
 }
-
-const NUM_PROBLEMS = 10;
 
 type DrillState = {
   problems: Problem[];
@@ -62,14 +61,14 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
   }
 }
 
-export default function DrillScreen({ profile, selectedOperations, sessions, addSession, setScreen }: DrillScreenProps) {
+export default function DrillScreen({ profile, selectedOperations, numProblems, sessions, addSession, setScreen }: DrillScreenProps) {
   const [state, dispatch] = useReducer(drillReducer, initialState);
   const { problems, currentIndex, userAnswer, attempts, startTime, feedback } = state;
 
   useEffect(() => {
-    const newProblems = generateWeightedProblems(selectedOperations, profile, sessions, NUM_PROBLEMS);
+    const newProblems = generateWeightedProblems(selectedOperations, profile, sessions, numProblems);
     dispatch({ type: 'reset', problems: newProblems, startTime: Date.now() });
-  }, [profile, selectedOperations, sessions]);
+  }, [profile, selectedOperations, sessions, numProblems]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

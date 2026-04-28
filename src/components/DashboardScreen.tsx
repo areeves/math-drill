@@ -22,6 +22,7 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
   return (
     <div className="dashboard-screen">
       <h1>Progress Dashboard</h1>
+      <button onClick={() => setScreen('settings')}>Settings</button>
       <h2>Difficulty Levels</h2>
       <ul>
         {entries.map(([op, level]) => (
