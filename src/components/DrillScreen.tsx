@@ -1,4 +1,4 @@
-import { useEffect, useReducer, type FormEvent } from 'react';
+import { useEffect, useReducer, useRef, type FormEvent } from 'react';
 import type { StudentProfile, Screen, Problem, Attempt, Session } from '../types';
 import { generateWeightedProblems, getOperationSymbol } from '../utils';
 
@@ -63,11 +63,16 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
 export default function DrillScreen({ profile, numProblems, sessions, addSession, setScreen }: DrillScreenProps) {
   const [state, dispatch] = useReducer(drillReducer, initialState);
   const { problems, currentIndex, userAnswer, attempts, startTime, feedback } = state;
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const newProblems = generateWeightedProblems(profile.settings.includedOperations, profile, sessions, numProblems);
     dispatch({ type: 'reset', problems: newProblems, startTime: Date.now() });
   }, [profile, sessions, numProblems]);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [currentIndex]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -122,6 +127,7 @@ export default function DrillScreen({ profile, numProblems, sessions, addSession
         <span>=</span>
         <form onSubmit={handleSubmit}>
           <input
+            ref={inputRef}
             type="number"
             value={userAnswer}
             onChange={(e) => dispatch({ type: 'setUserAnswer', userAnswer: e.target.value })}
