@@ -1,9 +1,11 @@
-import type { Screen, Session, Operation } from '../types';
-import { getOperationSymbol } from '../utils';
+import type { Screen, Session, Operation, Achievement } from '../types';
+import { getOperationSymbol, getAchievementDescription } from '../utils';
 
 interface SummaryScreenProps {
   session: Session | null;
   increasedOps: Operation[];
+  xpGain: number;
+  newAchievements: Achievement[];
   setScreen: (screen: Screen) => void;
 }
 
@@ -15,7 +17,7 @@ function getPerformanceMessage(percentage: number): string {
   return "Keep trying! You'll improve with practice! 🚀";
 }
 
-export default function SummaryScreen({ session, increasedOps, setScreen }: SummaryScreenProps) {
+export default function SummaryScreen({ session, increasedOps, xpGain, newAchievements, setScreen }: SummaryScreenProps) {
   if (!session) {
     return (
       <div className="summary-screen">
@@ -43,12 +45,37 @@ export default function SummaryScreen({ session, increasedOps, setScreen }: Summ
         Time: {minutes}m {seconds}s
       </div>
       <p className="performance-message">{getPerformanceMessage(percentage)}</p>
+      
+      {xpGain > 0 && (
+        <div className="xp-gain">
+          <p className="xp-earned">+{xpGain} XP</p>
+        </div>
+      )}
+      
       {increasedOps.length > 0 && (
         <div className="celebration">
           <h2>🎉 Level Up! 🎉</h2>
           <p>You've improved in: {increasedOps.map(op => getOperationSymbol(op)).join(', ')}</p>
         </div>
       )}
+      
+      {newAchievements.length > 0 && (
+        <div className="new-achievements">
+          <h2>🏆 New Achievements! 🏆</h2>
+          <ul className="achievement-list">
+            {newAchievements.map((achievement) => {
+              const desc = getAchievementDescription(achievement.type);
+              return (
+                <li key={achievement.id} className="achievement-item">
+                  <span className="achievement-emoji">{desc.emoji}</span>
+                  <span className="achievement-title">{desc.title}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      
       <button onClick={() => setScreen('home')}>Back to Home</button>
     </div>
   );

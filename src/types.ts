@@ -2,6 +2,22 @@ export type Operation = 'add' | 'sub' | 'mul' | 'div';
 
 export type DifficultyLevel = 1 | 2 | 3 | 4;
 
+export type AchievementType = 
+  | 'first-session' 
+  | '7-day-streak' 
+  | '30-day-streak'
+  | 'perfect-score'
+  | 'level-up-add'
+  | 'level-up-sub'
+  | 'level-up-mul'
+  | 'level-up-div';
+
+export interface Achievement {
+  id: string;
+  type: AchievementType;
+  earnedAt: number; // timestamp
+}
+
 export interface ProfileSettings {
   problemsPerSession: 5 | 10 | 20;
   includedOperations: Operation[];
@@ -12,6 +28,10 @@ export interface StudentProfile {
   avatar: string; // URL or name
   difficultyLevels: Record<Operation, DifficultyLevel>;
   settings: ProfileSettings;
+  xp: number;
+  level: number;
+  achievements: Achievement[];
+  lastSessionDate?: number; // timestamp of last session day for streak tracking
 }
 
 export interface Problem {

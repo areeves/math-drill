@@ -75,6 +75,9 @@ export function loadProfile(): StudentProfile | null {
       ...DEFAULT_SETTINGS,
       ...(parsed.settings ?? {}),
     },
+    xp: parsed.xp ?? 0,
+    level: parsed.level ?? 1,
+    achievements: parsed.achievements ?? [],
   };
 }
 
@@ -214,4 +217,171 @@ export function generateWeightedProblems(
   }
 
   return problems;
+}
+
+// Gamification: XP and Levels
+const XP_PER_LEVEL = 100;
+const MIN_XP_FOR_SESSION = 10; // minimum XP even for 0% score
+
+export function calculateXpGain(scorePercentage: number, numProblems: number): number {
+  // Base XP scaled by percentage, minimum of MIN_XP_FOR_SESSION
+  const baseXp = MIN_XP_FOR_SESSION + Math.ceil((scorePercentage / 100) * (numProblems * 2));
+  return Math.max(MIN_XP_FOR_SESSION, baseXp);
+}
+
+export function calculateLevelFromXp(xp: number): number {
+  return Math.floor(xp / XP_PER_LEVEL) + 1;
+}
+
+export function getXpForLevel(level: number): number {
+  return (level - 1) * XP_PER_LEVEL;
+}
+
+export function getXpProgress(xp: number): { currentLevel: number; xpInLevel: number; xpForLevel: number } {
+  const currentLevel = calculateLevelFromXp(xp);
+  const xpForCurrentLevel = getXpForLevel(currentLevel);
+  const xpInLevel = xp - xpForCurrentLevel;
+  const xpForLevel = XP_PER_LEVEL;
+  return { currentLevel, xpInLevel, xpForLevel };
+}
+
+export function calculateDailyStreak(sessions: Session[]): number {
+  if (sessions.length === 0) return 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMs = today.getTime();
+
+  let streak = 0;
+  let currentDate = todayMs;
+
+  // Check sessions from most recent backwards
+  for (let i = sessions.length - 1; i >= 0; i--) {
+    const sessionDate = new Date(sessions[i].timestamp);
+    sessionDate.setHours(0, 0, 0, 0);
+    const sessionDateMs = sessionDate.getTime();
+
+    if (sessionDateMs === currentDate) {
+      // Session on this day
+      streak++;
+      currentDate -= 24 * 60 * 60 * 1000; // Move to previous day
+    } else if (sessionDateMs < currentDate) {
+      // Gap found, break the streak
+      break;
+    }
+  }
+
+  return streak;
+}
+
+import type { Achievement, AchievementType } from './types';
+
+export function checkAchievements(
+  profile: StudentProfile,
+  session: Session,
+  sessions: Session[],
+  newDifficultyIncreases: Operation[]
+): Achievement[] {
+  const newAchievements: Achievement[] = [];
+  const now = Date.now();
+  const totalSessions = sessions.length;
+  const correctCount = session.attempts.filter(a => a.correct).length;
+  const isPerfectScore = correctCount === session.attempts.length && session.attempts.length > 0;
+  const streak = calculateDailyStreak(sessions);
+
+  // FR-7.3: Award achievements for specific events
+  
+  // First session completed
+  if (totalSessions === 1) {
+    newAchievements.push({
+      id: `first-session-${now}`,
+      type: 'first-session',
+      earnedAt: now,
+    });
+  }
+
+  // 7-day streak
+  if (streak === 7 && !profile.achievements.some(a => a.type === '7-day-streak')) {
+    newAchievements.push({
+      id: `7-day-streak-${now}`,
+      type: '7-day-streak',
+      earnedAt: now,
+    });
+  }
+
+  // 30-day streak
+  if (streak === 30 && !profile.achievements.some(a => a.type === '30-day-streak')) {
+    newAchievements.push({
+      id: `30-day-streak-${now}`,
+      type: '30-day-streak',
+      earnedAt: now,
+    });
+  }
+
+  // Perfect score
+  if (isPerfectScore) {
+    newAchievements.push({
+      id: `perfect-score-${now}`,
+      type: 'perfect-score',
+      earnedAt: now,
+    });
+  }
+
+  // Difficulty level-up (for each operation that increased)
+  newDifficultyIncreases.forEach(op => {
+    const achievementType = `level-up-${op}` as AchievementType;
+    newAchievements.push({
+      id: `${achievementType}-${now}`,
+      type: achievementType,
+      earnedAt: now,
+    });
+  });
+
+  return newAchievements;
+}
+
+export function getAchievementDescription(type: AchievementType): { title: string; description: string; emoji: string } {
+  const descriptions: Record<AchievementType, { title: string; description: string; emoji: string }> = {
+    'first-session': {
+      title: 'First Session',
+      description: 'Completed your first math drill session',
+      emoji: '🎉',
+    },
+    '7-day-streak': {
+      title: '7-Day Streak',
+      description: 'Completed sessions on 7 consecutive days',
+      emoji: '🔥',
+    },
+    '30-day-streak': {
+      title: '30-Day Streak',
+      description: 'Completed sessions on 30 consecutive days',
+      emoji: '⭐',
+    },
+    'perfect-score': {
+      title: 'Perfect Score',
+      description: 'Answered all problems correctly in a session',
+      emoji: '💯',
+    },
+    'level-up-add': {
+      title: 'Addition Level Up',
+      description: 'Mastered a difficulty level in addition',
+      emoji: '➕',
+    },
+    'level-up-sub': {
+      title: 'Subtraction Level Up',
+      description: 'Mastered a difficulty level in subtraction',
+      emoji: '➖',
+    },
+    'level-up-mul': {
+      title: 'Multiplication Level Up',
+      description: 'Mastered a difficulty level in multiplication',
+      emoji: '✖️',
+    },
+    'level-up-div': {
+      title: 'Division Level Up',
+      description: 'Mastered a difficulty level in division',
+      emoji: '➗',
+    },
+  };
+  return descriptions[type];
 }

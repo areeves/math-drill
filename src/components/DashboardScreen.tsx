@@ -1,5 +1,5 @@
 import type { StudentProfile, Session, Screen, Operation, DifficultyLevel } from '../types';
-import { getOperationSymbol } from '../utils';
+import { getOperationSymbol, getAchievementDescription } from '../utils';
 
 interface DashboardScreenProps {
   profile: StudentProfile | null;
@@ -23,6 +23,7 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
     <div className="dashboard-screen">
       <h1>Progress Dashboard</h1>
       <button onClick={() => setScreen('settings')}>Settings</button>
+      
       <h2>Difficulty Levels</h2>
       <ul>
         {entries.map(([op, level]) => (
@@ -31,9 +32,29 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
           </li>
         ))}
       </ul>
+      
       <h2>Recent Sessions</h2>
       <p>Total sessions: {sessions.length}</p>
       {/* TODO: More detailed stats */}
+      
+      <h2>Achievements</h2>
+      {profile.achievements.length === 0 ? (
+        <p>No achievements yet. Keep practicing!</p>
+      ) : (
+        <div className="achievements-grid">
+          {profile.achievements.map((achievement) => {
+            const desc = getAchievementDescription(achievement.type);
+            return (
+              <div key={achievement.id} className="achievement-card">
+                <div className="achievement-emoji">{desc.emoji}</div>
+                <div className="achievement-name">{desc.title}</div>
+                <div className="achievement-description">{desc.description}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      
       <button onClick={() => setScreen('home')}>Back to Home</button>
     </div>
   );
