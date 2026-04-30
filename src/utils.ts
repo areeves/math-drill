@@ -427,3 +427,50 @@ export function getAchievementDescription(type: AchievementType): { title: strin
   };
   return descriptions[type];
 }
+
+// Dashboard utility functions
+export function getSessionsInTimeRange(sessions: Session[], days: number): Session[] {
+  if (days === 0) return sessions; // All time
+
+  const now = Date.now();
+  const cutoff = now - (days * 24 * 60 * 60 * 1000);
+  return sessions.filter(session => session.timestamp >= cutoff);
+}
+
+export function getAccuracyByOperation(sessions: Session[]): Record<Operation, number> {
+  const accuracies: Record<Operation, number> = { add: 0, sub: 0, mul: 0, div: 0 };
+
+  ['add', 'sub', 'mul', 'div'].forEach(op => {
+    const attempts = sessions.flatMap(s => s.attempts.filter(a => a.problem.operation === op));
+    accuracies[op as Operation] = attempts.length > 0 ? calculateAccuracy(attempts) : 0;
+  });
+
+  return accuracies;
+}
+
+export function getSessionScoresOverTime(sessions: Session[]): Array<{ date: string; score: number }> {
+  const sortedSessions = [...sessions].sort((a, b) => a.timestamp - b.timestamp);
+  return sortedSessions.map(session => {
+    const correctCount = session.attempts.filter(a => a.correct).length;
+    const score = session.attempts.length > 0 ? (correctCount / session.attempts.length) * 100 : 0;
+    const date = new Date(session.timestamp).toISOString().split('T')[0]; // YYYY-MM-DD format
+    return { date, score };
+  });
+}
+
+export function getWeakestOperation(sessions: Session[]): Operation | null {
+  if (sessions.length === 0) return null;
+
+  const accuracies = getAccuracyByOperation(sessions);
+  let weakestOp: Operation | null = null;
+  let lowestAccuracy = 1;
+
+  Object.entries(accuracies).forEach(([op, accuracy]) => {
+    if (accuracy < lowestAccuracy) {
+      lowestAccuracy = accuracy;
+      weakestOp = op as Operation;
+    }
+  });
+
+  return weakestOp;
+}

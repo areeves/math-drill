@@ -1,5 +1,14 @@
 import type { StudentProfile, Session, Screen, Operation, DifficultyLevel } from '../types';
-import { deriveAchievementsFromSessions, getOperationSymbol, getAchievementDescription } from '../utils';
+import { 
+  deriveAchievementsFromSessions, 
+  getOperationSymbol, 
+  getAchievementDescription,
+  getSessionsInTimeRange,
+  getAccuracyByOperation,
+  getSessionScoresOverTime,
+  getWeakestOperation,
+  calculateDailyStreak
+} from '../utils';
 
 interface DashboardScreenProps {
   profile: StudentProfile | null;
@@ -20,23 +29,105 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
     return Math.round((correct / relevantAttempts.length) * 100);
   };
 
+  // Calculate accuracies for different time periods
+  const sessions7Days = getSessionsInTimeRange(sessions, 7);
+  const sessions30Days = getSessionsInTimeRange(sessions, 30);
+  const accuracies7Days = getAccuracyByOperation(sessions7Days);
+  const accuracies30Days = getAccuracyByOperation(sessions30Days);
+  const accuraciesAllTime = getAccuracyByOperation(sessions);
+
+  // Get session scores for chart
+  const sessionScores = getSessionScoresOverTime(sessions);
+
+  // Get weakest operation
+  const weakestOp = getWeakestOperation(sessions);
+
+  // Get daily streak
+  const dailyStreak = calculateDailyStreak(sessions);
+
   return (
     <div className="dashboard-screen">
       <h1>Progress Dashboard</h1>
       <button onClick={() => setScreen('settings')}>Settings</button>
       
-      <h2>Difficulty Levels</h2>
+      <h2>Current Difficulty Levels</h2>
       <ul>
         {entries.map(([op, level]) => (
           <li key={op}>
-            {getOperationSymbol(op)}: Level {level} (Accuracy: {getAccuracy(op)}%)
+            {getOperationSymbol(op)}: Level {level} (Overall Accuracy: {getAccuracy(op)}%)
           </li>
         ))}
       </ul>
+
+      {weakestOp && (
+        <div className="focus-area">
+          <h2>🎯 Area to Focus On</h2>
+          <p>Your lowest accuracy is in <strong>{getOperationSymbol(weakestOp)}</strong>. 
+             Consider practicing this operation more!</p>
+        </div>
+      )}
       
-      <h2>Recent Sessions</h2>
-      <p>Total sessions: {sessions.length}</p>
-      {/* TODO: More detailed stats */}
+      <h2>Accuracy by Time Period</h2>
+      <div className="accuracy-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Operation</th>
+              <th>Last 7 Days</th>
+              <th>Last 30 Days</th>
+              <th>All Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(['add', 'sub', 'mul', 'div'] as Operation[]).map(op => (
+              <tr key={op}>
+                <td>{getOperationSymbol(op)}</td>
+                <td>{sessions7Days.length > 0 ? Math.round(accuracies7Days[op] * 100) : '—'}%</td>
+                <td>{sessions30Days.length > 0 ? Math.round(accuracies30Days[op] * 100) : '—'}%</td>
+                <td>{Math.round(accuraciesAllTime[op] * 100)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Session Statistics</h2>
+      <div className="stats-grid">
+        <div className="stat-item">
+          <div className="stat-value">{sessions.length}</div>
+          <div className="stat-label">Total Sessions</div>
+        </div>
+        <div className="stat-item">
+          <div className="stat-value">{dailyStreak}</div>
+          <div className="stat-label">Day Streak</div>
+        </div>
+        <div className="stat-item">
+          <div className="stat-value">
+            {sessions.length > 0 ? Math.round(sessionScores.reduce((sum, s) => sum + s.score, 0) / sessionScores.length) : 0}%
+          </div>
+          <div className="stat-label">Average Score</div>
+        </div>
+      </div>
+
+      <h2>Session Scores Over Time</h2>
+      {sessionScores.length > 0 ? (
+        <div className="score-chart">
+          {sessionScores.slice(-10).map((score, index) => (
+            <div key={index} className="chart-bar">
+              <div className="bar-label">{score.date}</div>
+              <div className="bar-container">
+                <div 
+                  className="bar-fill" 
+                  style={{ width: `${score.score}%` }}
+                  title={`${Math.round(score.score)}%`}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>No sessions completed yet.</p>
+      )}
       
       <h2>Achievements</h2>
       {achievements.length === 0 ? (
