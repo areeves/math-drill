@@ -75,9 +75,6 @@ export function loadProfile(): StudentProfile | null {
       ...DEFAULT_SETTINGS,
       ...(parsed.settings ?? {}),
     },
-    xp: parsed.xp ?? 0,
-    level: parsed.level ?? 1,
-    achievements: parsed.achievements ?? [],
   };
 }
 
@@ -276,68 +273,110 @@ export function calculateDailyStreak(sessions: Session[]): number {
 
 import type { Achievement, AchievementType } from './types';
 
-export function checkAchievements(
-  profile: StudentProfile,
-  session: Session,
-  sessions: Session[],
-  newDifficultyIncreases: Operation[]
-): Achievement[] {
-  const newAchievements: Achievement[] = [];
-  const now = Date.now();
-  const totalSessions = sessions.length;
-  const correctCount = session.attempts.filter(a => a.correct).length;
-  const isPerfectScore = correctCount === session.attempts.length && session.attempts.length > 0;
-  const streak = calculateDailyStreak(sessions);
+const DEFAULT_DIFFICULTY_LEVELS: Record<Operation, DifficultyLevel> = {
+  add: 1,
+  sub: 1,
+  mul: 1,
+  div: 1,
+};
 
-  // FR-7.3: Award achievements for specific events
-  
-  // First session completed
-  if (totalSessions === 1) {
-    newAchievements.push({
-      id: `first-session-${now}`,
-      type: 'first-session',
-      earnedAt: now,
-    });
-  }
+export function deriveAchievementsFromSessions(sessions: Session[]): Achievement[] {
+  const achievements: Achievement[] = [];
+  const earnedOneTime = new Set<AchievementType>();
+  let currentLevels = { ...DEFAULT_DIFFICULTY_LEVELS };
+  let previousSessionDateMs: number | null = null;
+  let currentStreak = 0;
 
-  // 7-day streak
-  if (streak === 7 && !profile.achievements.some(a => a.type === '7-day-streak')) {
-    newAchievements.push({
-      id: `7-day-streak-${now}`,
-      type: '7-day-streak',
-      earnedAt: now,
-    });
-  }
+  const ordered = [...sessions].sort((a, b) => a.timestamp - b.timestamp);
 
-  // 30-day streak
-  if (streak === 30 && !profile.achievements.some(a => a.type === '30-day-streak')) {
-    newAchievements.push({
-      id: `30-day-streak-${now}`,
-      type: '30-day-streak',
-      earnedAt: now,
-    });
-  }
+  ordered.forEach((session, index) => {
+    const totalSessions = index + 1;
+    const sessionDate = new Date(session.timestamp);
+    sessionDate.setHours(0, 0, 0, 0);
+    const sessionDateMs = sessionDate.getTime();
 
-  // Perfect score
-  if (isPerfectScore) {
-    newAchievements.push({
-      id: `perfect-score-${now}`,
-      type: 'perfect-score',
-      earnedAt: now,
-    });
-  }
+    if (previousSessionDateMs === null) {
+      currentStreak = 1;
+    } else if (sessionDateMs === previousSessionDateMs) {
+      // Multiple sessions same day do not change streak count.
+    } else if (sessionDateMs === previousSessionDateMs + 24 * 60 * 60 * 1000) {
+      currentStreak += 1;
+    } else {
+      currentStreak = 1;
+    }
 
-  // Difficulty level-up (for each operation that increased)
-  newDifficultyIncreases.forEach(op => {
-    const achievementType = `level-up-${op}` as AchievementType;
-    newAchievements.push({
-      id: `${achievementType}-${now}`,
-      type: achievementType,
-      earnedAt: now,
+    previousSessionDateMs = sessionDateMs;
+
+    const sessionTimestamp = session.timestamp;
+    const correctCount = session.attempts.filter(a => a.correct).length;
+    const isPerfectScore = session.attempts.length > 0 && correctCount === session.attempts.length;
+
+    if (totalSessions === 1 && !earnedOneTime.has('first-session')) {
+      earnedOneTime.add('first-session');
+      achievements.push({
+        id: `first-session-${sessionTimestamp}`,
+        type: 'first-session',
+        earnedAt: sessionTimestamp,
+      });
+    }
+
+    if (currentStreak === 7 && !earnedOneTime.has('7-day-streak')) {
+      earnedOneTime.add('7-day-streak');
+      achievements.push({
+        id: `7-day-streak-${sessionTimestamp}`,
+        type: '7-day-streak',
+        earnedAt: sessionTimestamp,
+      });
+    }
+
+    if (currentStreak === 30 && !earnedOneTime.has('30-day-streak')) {
+      earnedOneTime.add('30-day-streak');
+      achievements.push({
+        id: `30-day-streak-${sessionTimestamp}`,
+        type: '30-day-streak',
+        earnedAt: sessionTimestamp,
+      });
+    }
+
+    if (isPerfectScore) {
+      achievements.push({
+        id: `perfect-score-${sessionTimestamp}`,
+        type: 'perfect-score',
+        earnedAt: sessionTimestamp,
+      });
+    }
+
+    const { newLevels, increasedOps } = adjustDifficultyLevels(currentLevels, ordered.slice(0, totalSessions));
+    increasedOps.forEach(op => {
+      const achievementType = `level-up-${op}` as AchievementType;
+      achievements.push({
+        id: `${achievementType}-${sessionTimestamp}`,
+        type: achievementType,
+        earnedAt: sessionTimestamp,
+      });
     });
+    currentLevels = newLevels;
   });
 
-  return newAchievements;
+  return achievements;
+}
+
+export function getXpProgressFromSessions(sessions: Session[]): { currentLevel: number; xpInLevel: number; xpForLevel: number } {
+  const totalXp = sessions.reduce((total, session) => {
+    const correctCount = session.attempts.filter(a => a.correct).length;
+    const scorePercentage = session.attempts.length > 0 ? (correctCount / session.attempts.length) * 100 : 0;
+    return total + calculateXpGain(scorePercentage, session.attempts.length);
+  }, 0);
+
+  const currentLevel = calculateLevelFromXp(totalXp);
+  const xpForCurrentLevel = getXpForLevel(currentLevel);
+  const xpInLevel = totalXp - xpForCurrentLevel;
+
+  return {
+    currentLevel,
+    xpInLevel,
+    xpForLevel: XP_PER_LEVEL,
+  };
 }
 
 export function getAchievementDescription(type: AchievementType): { title: string; description: string; emoji: string } {

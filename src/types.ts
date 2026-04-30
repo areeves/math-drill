@@ -28,9 +28,6 @@ export interface StudentProfile {
   avatar: string; // URL or name
   difficultyLevels: Record<Operation, DifficultyLevel>;
   settings: ProfileSettings;
-  xp: number;
-  level: number;
-  achievements: Achievement[];
   lastSessionDate?: number; // timestamp of last session day for streak tracking
 }
 

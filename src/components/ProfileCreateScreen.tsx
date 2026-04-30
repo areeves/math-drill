@@ -26,9 +26,6 @@ export default function ProfileCreateScreen({ setProfile, setScreen }: ProfileCr
         avatar: selectedAvatar,
         difficultyLevels: defaultDifficultyLevels,
         settings: defaultSettings,
-        xp: 0,
-        level: 1,
-        achievements: [],
       };
       setProfile(profile);
       setScreen('home');

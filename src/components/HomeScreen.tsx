@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
-import type { StudentProfile, Screen } from '../types';
-import { getXpProgress } from '../utils';
+import type { StudentProfile, Screen, Session } from '../types';
+import { deriveAchievementsFromSessions, getXpProgressFromSessions } from '../utils';
 
 interface HomeScreenProps {
   profile: StudentProfile | null;
+  sessions: Session[];
   setScreen: (screen: Screen) => void;
 }
 
-export default function HomeScreen({ profile, setScreen }: HomeScreenProps) {
+export default function HomeScreen({ profile, sessions, setScreen }: HomeScreenProps) {
   useEffect(() => {
     if (!profile) {
       setScreen('profile-create');
@@ -19,8 +20,9 @@ export default function HomeScreen({ profile, setScreen }: HomeScreenProps) {
   }
 
   const canStart = profile.settings.includedOperations.length > 0;
-  const { currentLevel, xpInLevel, xpForLevel } = getXpProgress(profile.xp);
-  const xpProgressPercent = (xpInLevel / xpForLevel) * 100;
+  const { currentLevel, xpInLevel, xpForLevel } = getXpProgressFromSessions(sessions);
+  const xpProgressPercent = (xpForLevel === 0 ? 0 : (xpInLevel / xpForLevel) * 100);
+  const achievements = deriveAchievementsFromSessions(sessions);
 
   return (
     <div className="home-screen">
@@ -42,10 +44,10 @@ export default function HomeScreen({ profile, setScreen }: HomeScreenProps) {
       <button onClick={() => setScreen('dashboard')}>View Progress</button>
       <button onClick={() => setScreen('settings')}>Settings</button>
       
-      {profile.achievements.length > 0 && (
+      {achievements.length > 0 && (
         <div className="achievements-preview">
-          <h3>Achievements ({profile.achievements.length})</h3>
-          <p>You've earned {profile.achievements.length} achievement{profile.achievements.length !== 1 ? 's' : ''}!</p>
+          <h3>Achievements ({achievements.length})</h3>
+          <p>You've earned {achievements.length} achievement{achievements.length !== 1 ? 's' : ''}!</p>
         </div>
       )}
     </div>

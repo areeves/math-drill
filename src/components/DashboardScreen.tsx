@@ -1,5 +1,5 @@
 import type { StudentProfile, Session, Screen, Operation, DifficultyLevel } from '../types';
-import { getOperationSymbol, getAchievementDescription } from '../utils';
+import { deriveAchievementsFromSessions, getOperationSymbol, getAchievementDescription } from '../utils';
 
 interface DashboardScreenProps {
   profile: StudentProfile | null;
@@ -11,6 +11,7 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
   if (!profile) return <div>No profile found.</div>;
 
   const entries = Object.entries(profile.difficultyLevels) as Array<[Operation, DifficultyLevel]>;
+  const achievements = deriveAchievementsFromSessions(sessions);
 
   const getAccuracy = (op: Operation) => {
     const relevantAttempts = sessions.flatMap((s) => s.attempts.filter((a) => a.problem.operation === op));
@@ -38,11 +39,11 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
       {/* TODO: More detailed stats */}
       
       <h2>Achievements</h2>
-      {profile.achievements.length === 0 ? (
+      {achievements.length === 0 ? (
         <p>No achievements yet. Keep practicing!</p>
       ) : (
         <div className="achievements-grid">
-          {profile.achievements.map((achievement) => {
+          {achievements.map((achievement) => {
             const desc = getAchievementDescription(achievement.type);
             return (
               <div key={achievement.id} className="achievement-card">

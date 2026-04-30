@@ -7,8 +7,7 @@ import {
   saveSessions,
   adjustDifficultyLevels,
   calculateXpGain,
-  calculateLevelFromXp,
-  checkAchievements,
+  deriveAchievementsFromSessions,
 } from './utils';
 import HomeScreen from './components/HomeScreen';
 import ProfileCreateScreen from './components/ProfileCreateScreen';
@@ -46,9 +45,6 @@ function App() {
         problemsPerSession: 10,
         includedOperations: ['add', 'sub', 'mul', 'div'],
       },
-      xp: 0,
-      level: 1,
-      achievements: [],
     };
 
     setProfile(resetProfile);
@@ -64,40 +60,27 @@ function App() {
     saveSessions(newSessions);
     setLastSession(session);
 
-    // Adjust difficulty levels
     if (profile) {
       const { newLevels, increasedOps: incOps } = adjustDifficultyLevels(profile.difficultyLevels, newSessions);
-      
-      // FR-7.1: Calculate XP from session score
       const correctCount = session.attempts.filter(a => a.correct).length;
       const scorePercentage = (correctCount / session.attempts.length) * 100;
       const xpEarned = calculateXpGain(scorePercentage, session.attempts.length);
-      
-      // FR-7.2: Update level based on new XP
-      const newXp = profile.xp + xpEarned;
-      const newLevel = calculateLevelFromXp(newXp);
-      
-      // FR-7.3: Check for achievements
-      const achievements = checkAchievements(
-        { ...profile, xp: newXp, level: newLevel },
-        session,
-        newSessions,
-        incOps
-      );
-      
+
+      const previousAchievements = deriveAchievementsFromSessions(sessions);
+      const updatedAchievements = deriveAchievementsFromSessions(newSessions);
+      const previousIds = new Set(previousAchievements.map((achievement) => achievement.id));
+      const newAchievements = updatedAchievements.filter((achievement) => !previousIds.has(achievement.id));
+
       const updatedProfile: StudentProfile = {
         ...profile,
         difficultyLevels: newLevels,
-        xp: newXp,
-        level: newLevel,
-        achievements: [...profile.achievements, ...achievements],
       };
-      
+
       setProfile(updatedProfile);
       saveProfile(updatedProfile);
       setIncreasedOps(incOps);
       setXpGain(xpEarned);
-      setNewAchievements(achievements);
+      setNewAchievements(newAchievements);
     }
   };
 
@@ -107,6 +90,7 @@ function App() {
         return (
           <HomeScreen
             profile={profile}
+            sessions={sessions}
             setScreen={setScreen}
           />
         );
@@ -140,6 +124,7 @@ function App() {
         return (
           <HomeScreen
             profile={profile}
+            sessions={sessions}
             setScreen={setScreen}
           />
         );
