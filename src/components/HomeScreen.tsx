@@ -20,8 +20,8 @@ export default function HomeScreen({ profile, sessions, setScreen }: HomeScreenP
   }
 
   const canStart = profile.settings.includedOperations.length > 0;
-  const { currentLevel, xpInLevel, xpForLevel } = getXpProgressFromSessions(sessions);
-  const xpProgressPercent = (xpForLevel === 0 ? 0 : (xpInLevel / xpForLevel) * 100);
+  const { totalXp, currentLevel, xpInLevel, xpForLevel, xpToNextLevel } = getXpProgressFromSessions(sessions);
+  const xpProgressPercent = xpForLevel === 0 ? 0 : (xpInLevel / xpForLevel) * 100;
   const achievements = deriveAchievementsFromSessions(sessions);
 
   return (
@@ -33,10 +33,14 @@ export default function HomeScreen({ profile, sessions, setScreen }: HomeScreenP
       
       <div className="level-display">
         <div className="level">Level {currentLevel}</div>
+        <div className="xp-summary">
+          <div>Total XP: {totalXp}</div>
+          <div>Earn {xpToNextLevel} XP to Level {currentLevel + 1}</div>
+        </div>
         <div className="xp-bar">
           <div className="xp-progress" style={{ width: `${xpProgressPercent}%` }}></div>
         </div>
-        <div className="xp-text">{xpInLevel} / {xpForLevel} XP</div>
+        <div className="xp-text">{xpInLevel} / {xpForLevel} XP toward next level</div>
       </div>
 
       <button disabled={!canStart} onClick={() => setScreen('drill')}>Start Math Drill</button>

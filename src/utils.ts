@@ -361,7 +361,7 @@ export function deriveAchievementsFromSessions(sessions: Session[]): Achievement
   return achievements;
 }
 
-export function getXpProgressFromSessions(sessions: Session[]): { currentLevel: number; xpInLevel: number; xpForLevel: number } {
+export function getXpProgressFromSessions(sessions: Session[]): { totalXp: number; currentLevel: number; xpInLevel: number; xpForLevel: number; xpToNextLevel: number } {
   const totalXp = sessions.reduce((total, session) => {
     const correctCount = session.attempts.filter(a => a.correct).length;
     const scorePercentage = session.attempts.length > 0 ? (correctCount / session.attempts.length) * 100 : 0;
@@ -371,11 +371,14 @@ export function getXpProgressFromSessions(sessions: Session[]): { currentLevel: 
   const currentLevel = calculateLevelFromXp(totalXp);
   const xpForCurrentLevel = getXpForLevel(currentLevel);
   const xpInLevel = totalXp - xpForCurrentLevel;
+  const xpToNextLevel = XP_PER_LEVEL - xpInLevel;
 
   return {
+    totalXp,
     currentLevel,
     xpInLevel,
     xpForLevel: XP_PER_LEVEL,
+    xpToNextLevel,
   };
 }
 

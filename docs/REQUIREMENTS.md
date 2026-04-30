@@ -116,6 +116,7 @@ The dashboard is accessible from the home screen and intended for parent review.
 
 - **FR-7.1** The student earns XP for each completed session, scaled by score percentage.
 - **FR-7.2** XP accumulates toward levels displayed on the student's home screen.
+  - The home screen shows the student's current level, total XP earned, progress toward the next level, and XP required to reach the next level.
 - **FR-7.3** Milestone achievements are awarded for events such as: first session completed, 7-day streak, first difficulty level-up, 100% session score.
 - **FR-7.4** Earned achievements are visible on the student's profile screen.
 
