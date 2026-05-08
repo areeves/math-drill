@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { StudentProfile, Screen, Session, Operation, DifficultyLevel } from '../types';
 import { getOperationSymbol, generateSessionHistoryCsv, downloadCsv } from '../utils';
 
@@ -18,6 +19,8 @@ const difficultyLabels: Record<DifficultyLevel, string> = {
 };
 
 export default function SettingsScreen({ profile, sessions, updateProfile, clearProfileData, setScreen }: SettingsScreenProps) {
+  const [showClearConfirmation, setShowClearConfirmation] = useState(false);
+
   if (!profile) {
     return <div>No profile found.</div>;
   }
@@ -134,9 +137,19 @@ export default function SettingsScreen({ profile, sessions, updateProfile, clear
           Export Session History as CSV
         </button>
         {!canExport && <p className="info">Complete at least one session before exporting history.</p>}
-        <button className="danger" onClick={clearProfileData}>
-          Clear all stored profile data
-        </button>
+        {!showClearConfirmation ? (
+          <button className="danger" onClick={() => setShowClearConfirmation(true)}>
+            Clear all stored profile data
+          </button>
+        ) : (
+          <div className="confirmation-dialog">
+            <p>Are you sure you want to clear all profile data? This will reset your name, avatar, difficulty levels, and delete all session history. This action cannot be undone.</p>
+            <button className="danger" onClick={() => { clearProfileData(); setShowClearConfirmation(false); }}>
+              Yes, Clear All Data
+            </button>
+            <button onClick={() => setShowClearConfirmation(false)}>Cancel</button>
+          </div>
+        )}
       </div>
 
       <div className="settings-actions">

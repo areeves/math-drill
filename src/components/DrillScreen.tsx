@@ -119,6 +119,10 @@ export default function DrillScreen({ profile, numProblems, sessions, addSession
 
   return (
     <div className="drill-screen">
+      <header className="drill-header">
+        <h1>Math Drill</h1>
+        <button onClick={() => setScreen('home')}>Home</button>
+      </header>
       <div className="progress">Problem {currentIndex + 1} of {totalProblems}</div>
       <div className="problem">
         <span className="operand">{currentProblem.operand1}</span>

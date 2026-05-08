@@ -39,7 +39,8 @@ function App() {
     if (!profile) return;
 
     const resetProfile: StudentProfile = {
-      ...profile,
+      name: '',
+      avatar: '🐶',
       difficultyLevels: { add: 1, sub: 1, mul: 1, div: 1 },
       settings: {
         problemsPerSession: 10,

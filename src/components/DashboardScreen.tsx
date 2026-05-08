@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { StudentProfile, Session, Screen, Operation, DifficultyLevel } from '../types';
 import { 
   deriveAchievementsFromSessions, 
@@ -17,10 +18,14 @@ interface DashboardScreenProps {
 }
 
 export default function DashboardScreen({ profile, sessions, setScreen }: DashboardScreenProps) {
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
+
   if (!profile) return <div>No profile found.</div>;
 
   const entries = Object.entries(profile.difficultyLevels) as Array<[Operation, DifficultyLevel]>;
-  const achievements = deriveAchievementsFromSessions(sessions);
+  const allAchievements = deriveAchievementsFromSessions(sessions);
+  const sortedAchievements = allAchievements.sort((a, b) => b.earnedAt - a.earnedAt);
+  const recentAchievements = sortedAchievements.slice(0, 6);
 
   const getAccuracy = (op: Operation) => {
     const relevantAttempts = sessions.flatMap((s) => s.attempts.filter((a) => a.problem.operation === op));
@@ -130,21 +135,44 @@ export default function DashboardScreen({ profile, sessions, setScreen }: Dashbo
       )}
       
       <h2>Achievements</h2>
-      {achievements.length === 0 ? (
+      {allAchievements.length === 0 ? (
         <p>No achievements yet. Keep practicing!</p>
       ) : (
-        <div className="achievements-grid">
-          {achievements.map((achievement) => {
-            const desc = getAchievementDescription(achievement.type);
-            return (
-              <div key={achievement.id} className="achievement-card">
-                <div className="achievement-emoji">{desc.emoji}</div>
-                <div className="achievement-name">{desc.title}</div>
-                <div className="achievement-description">{desc.description}</div>
-              </div>
-            );
-          })}
-        </div>
+        <>
+          <div className="achievements-grid recent">
+            {recentAchievements.map((achievement) => {
+              const desc = getAchievementDescription(achievement.type);
+              return (
+                <div key={achievement.id} className="achievement-card">
+                  <div className="achievement-emoji">{desc.emoji}</div>
+                  <div className="achievement-name">{desc.title}</div>
+                  <div className="achievement-description">{desc.description}</div>
+                </div>
+              );
+            })}
+          </div>
+          {allAchievements.length > 6 && (
+            <div className="view-more-container">
+              <button onClick={() => setShowAllAchievements(!showAllAchievements)}>
+                {showAllAchievements ? 'Show Less' : 'View More'}
+              </button>
+            </div>
+          )}
+          {showAllAchievements && allAchievements.length > 6 && (
+            <div className="achievements-grid all">
+              {sortedAchievements.slice(6).map((achievement) => {
+                const desc = getAchievementDescription(achievement.type);
+                return (
+                  <div key={achievement.id} className="achievement-card">
+                    <div className="achievement-emoji">{desc.emoji}</div>
+                    <div className="achievement-name">{desc.title}</div>
+                    <div className="achievement-description">{desc.description}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
       )}
       
       <button onClick={() => setScreen('home')}>Back to Home</button>
