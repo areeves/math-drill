@@ -17,6 +17,13 @@ const difficultyLabels: Record<DifficultyLevel, string> = {
   4: 'Advanced',
 };
 
+const operationLabels: Record<Operation, string> = {
+  add: 'Addition',
+  sub: 'Subtraction',
+  mul: 'Multiplication',
+  div: 'Division',
+};
+
 export default function SettingsScreen({ profile, sessions, updateProfile, clearProfileData }: SettingsScreenProps) {
   const [showClearConfirmation, setShowClearConfirmation] = useState(false);
   const [name, setName] = useState(profile?.name ?? '');
@@ -147,7 +154,7 @@ export default function SettingsScreen({ profile, sessions, updateProfile, clear
                 checked={settings.includedOperations.includes(operation)}
                 onChange={() => handleToggleOperation(operation)}
               />
-              {getOperationSymbol(operation)} {operation}
+              {getOperationSymbol(operation)} {operationLabels[operation]}
             </label>
           ))}
         </div>
