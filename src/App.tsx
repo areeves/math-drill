@@ -125,7 +125,7 @@ function App() {
 
   return (
     <div className="app">
-      {profile && screen !== 'profile-create' && screen !== 'drill' && screen !== 'summary' && (
+      {profile && screen !== 'profile-create' && screen !== 'summary' && (
         <NavBar currentScreen={screen} setScreen={setScreen} />
       )}
       {renderScreen()}
