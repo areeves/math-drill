@@ -17,7 +17,9 @@ import DrillScreen from './components/DrillScreen';
 import SummaryScreen from './components/SummaryScreen';
 import DashboardScreen from './components/DashboardScreen';
 import SettingsScreen from './components/SettingsScreen';
+import PrivacyScreen from './components/PrivacyScreen';
 import NavBar from './components/NavBar';
+import Footer from './components/Footer';
 import './App.css';
 import type { Achievement } from './types';
 
@@ -100,7 +102,7 @@ function App() {
           />
         ) : null;
       case 'summary':
-        return <SummaryScreen session={lastSession} increasedOps={increasedOps} xpGain={xpGain} newAchievements={newAchievements} setScreen={setScreen} />;
+        return <SummaryScreen session={lastSession} increasedOps={increasedOps} xpGain={xpGain} newAchievements={newAchievements} setScreen={setScreen} showMainMenu={!!profile} />;
       case 'dashboard':
         return <DashboardScreen profile={profile} sessions={sessions} />;
       case 'settings':
@@ -112,6 +114,8 @@ function App() {
             clearProfileData={clearProfileData}
           />
         );
+      case 'privacy':
+        return <PrivacyScreen setScreen={setScreen} showMainMenu={!!profile} />;
       default:
         return (
           <HomeScreen
@@ -125,10 +129,13 @@ function App() {
 
   return (
     <div className="app">
-      {profile && screen !== 'profile-create' && screen !== 'summary' && (
+      {profile && screen !== 'profile-create' && (
         <NavBar currentScreen={screen} setScreen={setScreen} />
       )}
       {renderScreen()}
+      {screen === 'profile-create' && (
+        <Footer setScreen={setScreen} />
+      )}
     </div>
   );
 }
