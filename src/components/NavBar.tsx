@@ -1,4 +1,5 @@
 import type { Screen } from '../types';
+import styles from './NavBar.module.css';
 
 interface NavBarProps {
   currentScreen: Screen;
@@ -26,11 +27,11 @@ export default function NavBar({ currentScreen, setScreen }: NavBarProps) {
     screen === currentScreen || (currentScreen === 'summary' && screen === 'home');
 
   return (
-    <nav className="nav-bar">
+    <nav className={styles.navBar}>
       {navItems.map((item) => (
         <button
           key={item.screen}
-          className={isActive(item.screen) ? 'active' : ''}
+          className={`${styles.button} ${isActive(item.screen) ? styles.active : ''}`.trim()}
           onClick={() => handleNavClick(item.screen)}
         >
           {item.label}

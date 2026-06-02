@@ -6,38 +6,7 @@
   box-sizing: border-box;
 }
 
-.nav-bar {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto 20px;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px;
-  background-color: var(--surface-strong);
-  border: 1px solid var(--surface-border);
-  border-radius: 8px;
-}
 
-.nav-bar button {
-  padding: 8px 16px;
-  background-color: var(--surface);
-  border: 1px solid var(--surface-border);
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text);
-}
-
-.nav-bar button.active {
-  background-color: #007bff;
-  color: white;
-}
-
-.nav-bar button:hover:not(.active) {
-  background-color: var(--surface-muted);
-}
 
 .home-screen, .profile-create-screen, .drill-screen, .summary-screen, .dashboard-screen, .settings-screen {
   text-align: center;
